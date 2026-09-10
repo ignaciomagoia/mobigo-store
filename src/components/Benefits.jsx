@@ -1,10 +1,10 @@
-import { BadgeCheck, ClipboardCheck, MessagesSquare, Truck } from 'lucide-react';
+import { BadgeCheck, ClipboardCheck, MessagesSquare, Sparkles } from 'lucide-react';
 
 const benefits = [
   { icon: BadgeCheck, title: 'Garantía', subtitle: 'La tranquilidad de elegir con confianza.' },
   { icon: ClipboardCheck, title: 'Equipos revisados', subtitle: 'Probados y seleccionados, en cada detalle.' },
   { icon: MessagesSquare, title: 'Atención personalizada', subtitle: 'Te ayudamos a elegir lo mejor para vos.' },
-  { icon: Truck, title: 'Envíos a todo el país', subtitle: 'Tu próximo upgrade llega a donde estés.' },
+  { icon: Sparkles, title: 'Asesoramiento', subtitle: 'Consultas claras para decidir sin vueltas.' },
 ];
 
 export default function Benefits() {

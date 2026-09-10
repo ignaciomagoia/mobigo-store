@@ -1,4 +1,5 @@
 import { getSupabase } from '../lib/supabase';
+import { normalizeCondition } from '../lib/productCopy';
 
 const columns = 'id,name,category,model,capacity,color,condition,battery_health,price_usd,price_ars,description,stock,featured,active,image_url,created_at,updated_at';
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -12,18 +13,19 @@ const colorSwatches = {
 // No incorpora datos de los mocks ni inventa especificaciones técnicas.
 function toProduct(row) {
   const image = row.image_url || '/images/products/placeholder.svg';
+  const condition = normalizeCondition(row.condition);
   return {
     id: row.id, name: row.name, category: row.category, model: row.model,
     capacity: row.capacity, color: row.color || 'Consultar color',
     colorHex: colorSwatches[row.color?.toLocaleLowerCase('es')] || '#c6c7c9',
-    condition: row.condition,
-    battery: row.condition === 'Usado' ? row.battery_health : null,
+    condition,
+    battery: condition === 'Usado' ? row.battery_health : null,
     price: Number(row.price_usd), currency: 'USD',
     priceArs: row.price_ars == null ? null : Number(row.price_ars),
     description: row.description || 'Consultanos para conocer más detalles de este producto.',
     stock: row.stock, featured: row.featured, active: row.active,
     createdAt: row.created_at, updatedAt: row.updated_at,
-    label: row.featured ? 'DESTACADO' : null,
+    label: null,
     image,
     gallery: [
       { src: image, alt: `${row.name}${row.color ? ` en ${row.color}` : ''}`, view: 'full' },

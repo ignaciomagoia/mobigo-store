@@ -14,6 +14,12 @@ export default defineConfig({
     url: 'http://127.0.0.1:5174',
     reuseExistingServer: false,
     // Valores ficticios exclusivos de pruebas. Todas las respuestas se interceptan.
-    env: { VITE_SUPABASE_URL: 'https://mobigo-test.supabase.co', VITE_SUPABASE_ANON_KEY: 'test-only-not-a-real-key', VITE_WHATSAPP_NUMBER: '', VITE_INSTAGRAM_USERNAME: '' },
+    env: {
+      VITE_SUPABASE_URL: 'https://mobigo-test.supabase.co',
+      VITE_SUPABASE_PUBLISHABLE_KEY: 'test-only-not-a-real-key',
+      VITE_SUPABASE_ANON_KEY: 'test-only-not-a-real-key',
+      VITE_WHATSAPP_NUMBER: '',
+      VITE_INSTAGRAM_USERNAME: '',
+    },
   },
 });

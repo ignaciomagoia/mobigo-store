@@ -89,7 +89,8 @@
   .container { width: calc(100% - 80px); }
   .announcement { font-size: 10px; }
   .announcement-inner { min-height: 33px; }
-  .header-inner { height: 91px; }
+  .header-inner { height: 91px; justify-content: center; position: relative; }
+  .header-inner > .brand { position: absolute; left: 0; }
   .brand-name { font-size: 32px; }
   .brand-caption { font-size: 8px; letter-spacing: 6.5px; }
   .navigation, .navigation.is-open { position: static; display: flex; flex-direction: row; align-items: center; gap: 28px; background: none; padding: 0; border: 0; box-shadow: none; }

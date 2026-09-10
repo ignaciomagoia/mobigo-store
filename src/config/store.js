@@ -1,7 +1,10 @@
+const mobigoWhatsappNumber = '5493515944821';
+const mobigoInstagramUsername = 'mobigo.store';
+
 export const store = {
   name: 'MobiGo Store',
-  whatsappNumber: (import.meta.env.VITE_WHATSAPP_NUMBER || '').replace(/\D/g, ''),
-  instagramUsername: (import.meta.env.VITE_INSTAGRAM_USERNAME || '').replace(/^@/, ''),
+  whatsappNumber: mobigoWhatsappNumber,
+  instagramUsername: mobigoInstagramUsername,
   // Si agregás un logo, colocá aquí su ruta: '/images/brand/logo.svg'.
   logo: null,
 };

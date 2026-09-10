@@ -1,13 +1,12 @@
 import { test, expect } from '@playwright/test';
 import { apiRoute, mockProducts, rows } from './fixtures/products';
 
-test('consulta activos y destacados y resuelve inactivos como inexistentes', async ({ page }) => {
+test('consulta activos y resuelve inactivos como inexistentes', async ({ page }) => {
   const requests = [];
   page.on('request', (request) => { if (request.url().includes('/rest/v1/products')) requests.push(new URL(request.url())); });
   await mockProducts(page);
   await page.goto('/');
-  await expect(page.locator('.product-card')).toHaveCount(4);
-  expect(requests.some((url) => url.searchParams.get('featured') === 'eq.true')).toBe(true);
+  await expect(page.locator('.product-card')).toHaveCount(3);
   await page.goto('/catalogo');
   await expect(page.locator('.product-card')).toHaveCount(6);
   await expect(page.getByText('Equipo inactivo')).toHaveCount(0);
@@ -38,7 +37,7 @@ test('un error permite reintentar y el detalle diferencia error de 404', async (
   await expect(page.getByText('Ese producto no está por acá.')).toHaveCount(0);
   await mockProducts(page);
   await page.locator('main').getByRole('button', { name: 'Reintentar' }).first().click();
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText(rows[0].name);
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(`${rows[0].name} ${rows[0].capacity}`);
 });
 
 test('adapta pesos, batería cero, campos opcionales e imagen faltante', async ({ page }) => {
@@ -50,7 +49,7 @@ test('adapta pesos, batería cero, campos opcionales e imagen faltante', async (
   await expect(page.locator('.detail-description')).toContainText('Consultanos para conocer más detalles');
   await page.goto('/catalogo');
   await expect(page.locator('.product-card')).toHaveCount(1);
-  await expect(page.locator('.product-card .battery')).toHaveText('0%');
+  await expect(page.locator('.product-card')).toContainText('Batería: 0%');
 });
 
 test('las fichas usan datos nuevos de la API y navegan a otro ID real', async ({ page }) => {
@@ -58,11 +57,11 @@ test('las fichas usan datos nuevos de la API y navegan a otro ID real', async ({
   await mockProducts(page, [fresh, rows[1]]);
   await page.goto('/catalogo');
   await expect(page.locator('.product-card')).toHaveCount(2);
-  await page.getByRole('link', { name: fresh.name, exact: true }).click();
+  await page.getByRole('link', { name: `${fresh.name} ${fresh.capacity}`, exact: true }).click();
   await expect(page).toHaveURL(`/producto/${fresh.id}`);
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText(fresh.name);
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(`${fresh.name} ${fresh.capacity}`);
   await expect(page.locator('.detail-price')).toHaveText('USD 777');
-  await page.locator('.related-section .product-button').click();
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText(rows[1].name);
+  await page.locator('.related-section .product-more-link').click();
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(`${rows[1].name} ${rows[1].capacity}`);
   await expect(page.locator('.detail-price')).toHaveText('USD 890');
 });

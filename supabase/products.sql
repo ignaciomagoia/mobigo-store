@@ -9,7 +9,7 @@ create table if not exists public.products (
   model text,
   capacity text,
   color text,
-  condition text not null check (condition in ('Nuevo', 'Usado')),
+  condition text not null check (condition in ('Sellado', 'Usado')),
   battery_health integer check (battery_health between 0 and 100),
   price_usd numeric(12,2) not null check (price_usd >= 0),
   price_ars numeric(16,2) check (price_ars >= 0),
