@@ -1,0 +1,37 @@
+name: Supabase keep alive
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 8 * * *'
+
+jobs:
+  keep-alive:
+    name: Query products table
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+
+    steps:
+      - name: Read one product from Supabase
+        env:
+          SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${SUPABASE_URL:-}" ] || [ -z "${SUPABASE_PUBLISHABLE_KEY:-}" ]; then
+            echo "Missing GitHub Secrets: VITE_SUPABASE_URL and/or VITE_SUPABASE_PUBLISHABLE_KEY"
+            exit 1
+          fi
+
+          SUPABASE_URL="${SUPABASE_URL%/}"
+
+          curl --fail --silent --show-error \
+            --request GET \
+            --url "${SUPABASE_URL}/rest/v1/products?select=id&limit=1" \
+            --header "apikey: ${SUPABASE_PUBLISHABLE_KEY}" \
+            --header "Authorization: Bearer ${SUPABASE_PUBLISHABLE_KEY}" \
+            --header "Accept: application/json" \
+            --output /tmp/supabase-keep-alive.json
+
+          echo "Supabase keep-alive query completed."
