@@ -16,10 +16,14 @@ export default function InstallmentsPopover({ product, exchangeRate, className =
     function updatePosition() {
       const rect = trigger.current?.getBoundingClientRect();
       if (!rect) return;
+      const popoverWidth = Math.min(300, window.innerWidth - 28);
+      const left = Math.min(Math.max(14, rect.left), window.innerWidth - popoverWidth - 14);
+      const shouldOpenAbove = rect.top > 260 || rect.top > window.innerHeight - rect.bottom;
       setPosition({
-        top: rect.bottom + window.scrollY + 8,
-        left: rect.left + window.scrollX,
-        width: rect.width,
+        top: shouldOpenAbove ? rect.top - 10 : rect.bottom + 10,
+        left,
+        width: popoverWidth,
+        transform: shouldOpenAbove ? 'translateY(-100%)' : 'none',
       });
     }
 
@@ -48,9 +52,9 @@ export default function InstallmentsPopover({ product, exchangeRate, className =
 
   const popover = open && createPortal(<div className="installments-layer">
     <button className="installments-backdrop" type="button" aria-label="Cerrar cuotas" onClick={() => setOpen(false)} />
-    <div className="installments-popover" ref={root} role="dialog" aria-label="Cuotas disponibles" style={position ? { '--installments-top': `${position.top}px`, '--installments-left': `${position.left}px`, '--installments-width': `${position.width}px` } : undefined}>
+    <div className="installments-popover" ref={root} role="dialog" aria-label="Cuotas disponibles" style={position ? { '--installments-top': `${position.top}px`, '--installments-left': `${position.left}px`, '--installments-width': `${position.width}px`, '--installments-transform': position.transform } : undefined}>
       <div className="installments-head">
-        <span>CUOTAS</span>
+        <span>TARJETA DE CRÉDITO</span>
         <button className="icon-button" type="button" aria-label="Cerrar cuotas" onClick={() => setOpen(false)}><X size={16} /></button>
       </div>
       <ul>
