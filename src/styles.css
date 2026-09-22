@@ -193,7 +193,6 @@
   .detail-price-note { font-size: 9px; color: #777; line-height: 1.7; margin-top: 6px; }
   .detail-installments { margin-top: 14px; }
   .detail-installments .installments-trigger { min-height: 44px; padding-inline: 18px; border-radius: 22px; font-size: 12px; }
-  .detail-installments .installments-popover { top: calc(100% + 10px); bottom: auto; width: min(360px, calc(100vw - 40px)); max-height: 320px; }
   .detail-attributes { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); margin-top: 23px; padding: 16px 0; display: grid; gap: 16px; }
   .detail-attributes > div { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 12px; }
   .detail-attributes > div > span { color: #777; }
@@ -285,15 +284,16 @@
 .product-local-price .installments-widget { width: 100%; }
 .installments-trigger { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 36px; padding: 9px 13px; border: 1px solid #d7e5eb; border-radius: 18px; background: #f4fafc; color: #253941; font-size: 10px; font-weight: 760; line-height: 1.3; transition: background .2s, border-color .2s, transform .2s; }
 .product-local-price .installments-trigger { width: 100%; }
-.installments-popover { position: absolute; z-index: 25; left: 0; top: calc(100% + 8px); width: min(290px, calc(100vw - 36px)); max-height: 240px; overflow: auto; padding: 14px; border: 1px solid #e2e7ea; border-radius: 18px; background: #fffffff2; box-shadow: 0 18px 50px #23313b20; backdrop-filter: blur(12px); }
-.product-card .installments-popover { top: auto; bottom: calc(100% + 8px); width: min(280px, 100%); }
+.installments-layer { position: fixed; inset: 0; z-index: 80; display: flex; align-items: flex-end; justify-content: center; padding: 18px; pointer-events: none; }
+.installments-backdrop { position: fixed; inset: 0; border-radius: 0; background: #23232342; pointer-events: auto; }
+.installments-popover { position: relative; z-index: 1; width: min(420px, 100%); max-height: min(72dvh, 520px); overflow: auto; padding: 18px; border: 1px solid #e2e7ea; border-radius: 24px; background: #fffffff5; box-shadow: 0 22px 70px #23313b30; backdrop-filter: blur(14px); pointer-events: auto; }
 .installments-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
 .installments-head > span { color: #3a5f70; font-size: 9px; font-weight: 820; letter-spacing: 1.5px; }
 .installments-head .icon-button { min-width: 32px; min-height: 32px; background: #f1f5f7; }
 .installments-popover ul { display: grid; gap: 7px; list-style: none; margin: 0; padding: 0; }
-.installments-popover li { display: flex; align-items: center; justify-content: space-between; gap: 14px; min-height: 32px; padding: 8px 10px; border-radius: 12px; background: #f5f7f8; font-size: 11px; color: #4e565b; }
-.installments-popover li strong { color: var(--ink); font-size: 11px; white-space: nowrap; }
-.installments-popover p { margin-top: 10px; color: #6c7479; font-size: 10px; line-height: 1.6; }
+.installments-popover li { display: flex; align-items: center; justify-content: space-between; gap: 14px; min-height: 44px; padding: 10px 12px; border-radius: 14px; background: #f5f7f8; font-size: 13px; color: #4e565b; }
+.installments-popover li strong { color: var(--ink); font-size: 13px; white-space: nowrap; }
+.installments-popover p { margin-top: 12px; color: #6c7479; font-size: 11px; line-height: 1.6; }
 .product-card-actions { display: grid; gap: 8px; margin-top: 12px; }
 .product-whatsapp { display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; min-height: 44px; margin-top: 12px; padding: 11px 12px; border-radius: 22px; background: #079b63; color: white; font-size: 10px; font-weight: 750; box-shadow: 0 10px 18px #079b6320; transition: transform .2s, background .2s, box-shadow .2s; }
 .product-card-actions .product-whatsapp { margin-top: 0; }
@@ -421,6 +421,12 @@ body.trade-in-open { overflow: hidden; }
 .categories-section-clean { margin-top: 30px; }
 
 @media (min-width: 700px) {
+  .installments-layer { display: block; padding: 0; background: transparent; }
+  .installments-backdrop { background: transparent; }
+  .installments-popover { position: absolute; top: var(--installments-top); left: min(var(--installments-left), calc(100vw - 340px)); width: max(290px, var(--installments-width)); max-width: 340px; max-height: min(360px, calc(100dvh - 40px)); padding: 14px; border-radius: 18px; }
+  .installments-popover li { min-height: 32px; padding: 8px 10px; font-size: 11px; }
+  .installments-popover li strong { font-size: 11px; }
+  .installments-popover p { font-size: 10px; }
   .detail-actions { grid-template-columns: 1fr 1fr; }
   .trade-in-overlay { place-items: center; padding: 28px; }
   .trade-in-header { padding: 30px 34px 20px; }
