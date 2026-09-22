@@ -1,13 +1,17 @@
 import { ArrowUpRight, BatteryMedium, Info } from 'lucide-react';
 import { Link } from 'react-router';
 import { formatPrice } from '../lib/formatPrice';
+import { canShowInstallments, formatArs, getProductArsPrice } from '../lib/pricing';
 import { productDisplayName, productInquiryMessage } from '../lib/productCopy';
 import ProductImage from './ProductImage';
 import { WhatsAppButton } from './ContactProvider';
 import TradeInButton from './trade-in/TradeInButton';
+import InstallmentsPopover from './InstallmentsPopover';
 
-export default function ProductCard({ product }) {
+export default function ProductCard({ product, exchangeRate }) {
   const conditionClass = product.condition === 'Sellado' ? 'is-sellado' : 'is-usado';
+  const showLocalPricing = canShowInstallments(product, exchangeRate);
+  const priceArs = showLocalPricing ? getProductArsPrice(product, exchangeRate) : null;
   return <article className="product-card">
     <Link className="product-image-link" to={`/producto/${product.id}`} aria-label={`Ver ${product.name} ${product.capacity || ''}`}>
       <span className={`product-label product-status ${conditionClass}`}>{product.condition}</span>
@@ -16,6 +20,10 @@ export default function ProductCard({ product }) {
     </Link>
     <div className="product-info">
       <h3><Link to={`/producto/${product.id}`}>{productDisplayName(product)}</Link></h3>
+      {showLocalPricing && <div className="product-local-price">
+        <span>{formatArs(priceArs)}</span>
+        <InstallmentsPopover product={product} exchangeRate={exchangeRate} />
+      </div>}
       <div className="product-specs">
         {product.battery != null && <span><BatteryMedium size={15} />Batería: {product.battery}%</span>}
         <span className="product-color"><i style={{ backgroundColor: product.colorHex }} />Color: {product.color}</span>

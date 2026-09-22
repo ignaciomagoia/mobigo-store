@@ -1,9 +1,10 @@
 import { getSupabase } from '../lib/supabase';
 import { normalizeCondition } from '../lib/productCopy';
+import { normalizeInstallments, normalizeInstallmentSurcharges } from '../lib/pricing';
 
 export const PRODUCT_IMAGES_BUCKET = 'product-images';
 
-const columns = 'id,name,category,model,capacity,color,condition,battery_health,price_usd,price_ars,description,stock,featured,active,image_url,created_at,updated_at';
+const columns = 'id,name,category,model,capacity,color,condition,battery_health,price_usd,max_installments,installment_surcharges,description,stock,featured,active,image_url,created_at,updated_at';
 
 function emptyToNull(value) {
   return value === '' || value == null ? null : value;
@@ -12,6 +13,7 @@ function emptyToNull(value) {
 function cleanProductPayload(product) {
   const condition = normalizeCondition(product.condition);
   const batteryHealth = emptyToNull(product.battery_health);
+  const maxInstallments = normalizeInstallments(product.max_installments);
   return {
     name: product.name.trim(),
     category: product.category,
@@ -21,7 +23,8 @@ function cleanProductPayload(product) {
     condition,
     battery_health: condition === 'Usado' && batteryHealth != null ? Number(batteryHealth) : null,
     price_usd: Number(product.price_usd),
-    price_ars: emptyToNull(product.price_ars) == null ? null : Number(product.price_ars),
+    max_installments: maxInstallments,
+    installment_surcharges: normalizeInstallmentSurcharges(product.installment_surcharges, maxInstallments),
     description: emptyToNull(product.description?.trim()),
     stock: Number(product.stock),
     featured: Boolean(product.featured),

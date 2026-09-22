@@ -3,6 +3,7 @@ import { Filter, Search } from 'lucide-react';
 import { Link } from 'react-router';
 import { getProducts } from '../services/products';
 import useProductsResource from '../hooks/useProductsResource';
+import useExchangeRate from '../hooks/useExchangeRate';
 import ProductsState from './ProductsState';
 import ProductGrid from './ProductGrid';
 import CatalogFilters from './CatalogFilters';
@@ -22,6 +23,7 @@ function filterBySelection(value, selected) {
 
 export default function CatalogShowcase({ categoryId = 'iphones', title = 'iPhones disponibles', eyebrow = 'CATÁLOGO MOBIGO', linkTo, linkLabel }) {
   const { data, loading, error, retry } = useProductsResource(getProducts);
+  const { rate: exchangeRate } = useExchangeRate({ enabled: !categoryId || categoryId === 'iphones' });
   const products = data || [];
   const [query, setQuery] = useState('');
   const [filters, setFilters] = useState(emptyFilters);
@@ -81,7 +83,7 @@ export default function CatalogShowcase({ categoryId = 'iphones', title = 'iPhon
     <div className="catalog-layout">
       <CatalogFilters open={filtersOpen} filters={filters} options={options} onToggle={toggleFilter} onClear={clearFilters} onClose={() => setFiltersOpen(false)} />
       <div className="catalog-products" aria-busy={loading}>
-        {loading || error || !scopedProducts.length ? <ProductsState loading={loading} error={error} onRetry={retry} /> : visible.length ? <ProductGrid products={visible} /> : <div className="empty-state">
+        {loading || error || !scopedProducts.length ? <ProductsState loading={loading} error={error} onRetry={retry} /> : visible.length ? <ProductGrid products={visible} exchangeRate={exchangeRate} /> : <div className="empty-state">
           <Search size={30} />
           <h2>No encontramos ese modelo.</h2>
           <p>Probá limpiar filtros o buscar otra capacidad.</p>

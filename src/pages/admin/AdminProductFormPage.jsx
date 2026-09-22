@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router';
 import { ArrowLeft, ImagePlus, Save } from 'lucide-react';
 import { categories } from '../../data/categories';
 import { isAbortError } from '../../lib/errors';
+import { DEFAULT_INSTALLMENTS, MAX_INSTALLMENTS, MIN_INSTALLMENTS, normalizeInstallments } from '../../lib/pricing';
 import ProductImage from '../../components/ProductImage';
 import { createAdminProduct, getAdminProductById, updateAdminProduct, uploadProductImage } from '../../services/adminProducts';
 
@@ -15,7 +16,8 @@ const initialForm = {
   condition: 'Sellado',
   battery_health: '',
   price_usd: '',
-  price_ars: '',
+  max_installments: String(DEFAULT_INSTALLMENTS),
+  installment_surcharges: {},
   stock: '1',
   description: '',
   featured: false,
@@ -33,7 +35,8 @@ function mapProductToForm(product) {
     condition: product.condition || 'Sellado',
     battery_health: product.battery_health ?? '',
     price_usd: product.price_usd ?? '',
-    price_ars: product.price_ars ?? '',
+    max_installments: String(product.max_installments ?? DEFAULT_INSTALLMENTS),
+    installment_surcharges: product.installment_surcharges || {},
     stock: product.stock ?? '0',
     description: product.description || '',
     featured: Boolean(product.featured),
@@ -49,6 +52,11 @@ function validate(form, imageFile) {
   if (!form.category) errors.push('La categoría es obligatoria.');
   if (!form.condition) errors.push('El estado es obligatorio.');
   if (form.price_usd === '' || Number(form.price_usd) < 0) errors.push('El precio USD debe ser válido.');
+  if (!Number.isInteger(Number(form.max_installments)) || Number(form.max_installments) < MIN_INSTALLMENTS || Number(form.max_installments) > MAX_INSTALLMENTS) errors.push('La cantidad máxima de cuotas debe estar entre 1 y 18.');
+  for (let quantity = MIN_INSTALLMENTS; quantity <= normalizeInstallments(form.max_installments); quantity += 1) {
+    const value = form.installment_surcharges[String(quantity)] ?? 0;
+    if (value !== '' && (!Number.isFinite(Number(value)) || Number(value) < 0)) errors.push(`El recargo de ${quantity} ${quantity === 1 ? 'cuota' : 'cuotas'} debe ser un número mayor o igual a 0.`);
+  }
   if (!Number.isInteger(Number(form.stock)) || Number(form.stock) < 0) errors.push('El stock debe ser un entero mayor o igual a cero.');
   if (form.condition === 'Usado' && form.battery_health !== '' && (Number(form.battery_health) < 0 || Number(form.battery_health) > 100)) errors.push('La batería debe estar entre 0 y 100.');
   if (imageFile && !imageFile.type.startsWith('image/')) errors.push('La imagen debe ser un archivo de imagen.');
@@ -93,10 +101,24 @@ export default function AdminProductFormPage() {
   useEffect(() => () => { if (objectPreview) URL.revokeObjectURL(objectPreview); }, [objectPreview]);
 
   const preview = useMemo(() => objectPreview || form.image_url || '/images/products/placeholder.svg', [form.image_url, objectPreview]);
+  const installmentQuantities = useMemo(() => {
+    const max = normalizeInstallments(form.max_installments);
+    return Array.from({ length: max }, (_, index) => index + 1);
+  }, [form.max_installments]);
 
   function updateField(event) {
     const { name, type, value, checked } = event.target;
     setForm((current) => ({ ...current, [name]: type === 'checkbox' ? checked : value }));
+  }
+
+  function updateSurcharge(quantity, value) {
+    setForm((current) => ({
+      ...current,
+      installment_surcharges: {
+        ...(current.installment_surcharges || {}),
+        [String(quantity)]: value,
+      },
+    }));
   }
 
   function handleImageChange(event) {
@@ -148,9 +170,21 @@ export default function AdminProductFormPage() {
         <label>Estado<select name="condition" value={form.condition} onChange={updateField}><option value="Sellado">Sellado</option><option value="Usado">Usado</option></select></label>
         <label className={form.condition === 'Usado' ? '' : 'is-muted'}>Salud de batería<input name="battery_health" type="number" min="0" max="100" value={form.battery_health} onChange={updateField} placeholder="92" disabled={form.condition !== 'Usado'} /></label>
         <label>Precio USD<input name="price_usd" type="number" min="0" step="0.01" value={form.price_usd} onChange={updateField} required /></label>
-        <label>Precio ARS opcional<input name="price_ars" type="number" min="0" step="0.01" value={form.price_ars} onChange={updateField} /></label>
+        <label>Cantidad máxima de cuotas<select name="max_installments" value={form.max_installments} onChange={updateField}>{Array.from({ length: MAX_INSTALLMENTS }, (_, index) => index + 1).map((quantity) => <option key={quantity} value={quantity}>{quantity} {quantity === 1 ? 'cuota' : 'cuotas'}</option>)}</select></label>
         <label>Stock<input name="stock" type="number" min="0" step="1" value={form.stock} onChange={updateField} required /></label>
       </div>
+      <section className="admin-installment-surcharges" aria-label="Recargo por cuota">
+        <div>
+          <h2>Recargo por cuota</h2>
+          <p>Usá 0 para cuotas sin recargo. El cliente verá el valor final calculado automáticamente.</p>
+        </div>
+        <div className="admin-surcharge-grid">
+          {installmentQuantities.map((quantity) => <label key={quantity}>
+            <span>{quantity} {quantity === 1 ? 'cuota' : 'cuotas'}</span>
+            <div><input type="number" min="0" step="0.01" inputMode="decimal" value={form.installment_surcharges[String(quantity)] ?? 0} onChange={(event) => updateSurcharge(quantity, event.target.value)} aria-label={`Recargo para ${quantity} ${quantity === 1 ? 'cuota' : 'cuotas'}`} /><span>%</span></div>
+          </label>)}
+        </div>
+      </section>
       <label className="admin-description">Descripción<textarea name="description" value={form.description} onChange={updateField} rows="5" placeholder="Detalles del estado, garantía y observaciones relevantes." /></label>
       <div className="admin-image-uploader">
         <div><ProductImage src={preview} alt="Preview del producto" /><span>Preview</span></div>

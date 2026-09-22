@@ -1,7 +1,8 @@
 import { getSupabase } from '../lib/supabase';
 import { normalizeCondition } from '../lib/productCopy';
+import { normalizeInstallments, normalizeInstallmentSurcharges } from '../lib/pricing';
 
-const columns = 'id,name,category,model,capacity,color,condition,battery_health,price_usd,price_ars,description,stock,featured,active,image_url,created_at,updated_at';
+const columns = 'id,name,category,model,capacity,color,condition,battery_health,price_usd,max_installments,installment_surcharges,description,stock,featured,active,image_url,created_at,updated_at';
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const colorSwatches = {
   'titanio desierto': '#c5ad95', 'titanio natural': '#aaa69b', azul: '#a9c5db',
@@ -21,7 +22,8 @@ function toProduct(row) {
     condition,
     battery: condition === 'Usado' ? row.battery_health : null,
     price: Number(row.price_usd), currency: 'USD',
-    priceArs: row.price_ars == null ? null : Number(row.price_ars),
+    maxInstallments: normalizeInstallments(row.max_installments),
+    installmentSurcharges: normalizeInstallmentSurcharges(row.installment_surcharges, row.max_installments),
     description: row.description || 'Consultanos para conocer más detalles de este producto.',
     stock: row.stock, featured: row.featured, active: row.active,
     createdAt: row.created_at, updatedAt: row.updated_at,
